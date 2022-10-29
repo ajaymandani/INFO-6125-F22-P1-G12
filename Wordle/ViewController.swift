@@ -20,6 +20,15 @@ class ViewController: UIViewController {
     @IBOutlet var buttonViewCollection: [UIView]!
     //default starting postion
     var positionNumber = 0;
+    
+    //variable for storing current answer by user
+    var currentAnswer = ""
+    
+    //variable for storing correct answer
+    var correctAnswer = "HGHHI"
+    
+    var storeBOXGuess = [0,0,0,0,0] // 0 means it's not in the answer, 1 means it's present but not in correct positon and 2 means its present and in correct possition
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -36,6 +45,7 @@ class ViewController: UIViewController {
     
     func startGame()
     {
+        currentAnswer = ""
         for labelGame in labels{
             labelGame.text = ""
         }
@@ -53,6 +63,7 @@ class ViewController: UIViewController {
         backBTN.isEnabled = !(positionNumber%5 == 0)
         
         labels[positionNumber].text  = ""
+        currentAnswer.removeLast()
         submitBTN.isEnabled = false
     }
     
@@ -71,7 +82,7 @@ class ViewController: UIViewController {
             backBTN.isEnabled = true
             
             labels[positionNumber].text  = sender.titleLabel?.text
-            
+            currentAnswer += sender.titleLabel?.text ?? ""
             //increasing the positon of the box to insert the text
             positionNumber = (positionNumber < 30 ? positionNumber + 1 : positionNumber)
           
@@ -87,8 +98,12 @@ class ViewController: UIViewController {
     {
         submitBTN.isEnabled = false
         backBTN.isEnabled = false
+        print(currentAnswer)
+        check()
+        currentAnswer = ""
         if(positionNumber > 28)
         {
+            
             startGame()
         }
         
@@ -110,6 +125,52 @@ class ViewController: UIViewController {
             add(sender: sender)
     }
     
+    //algorithm for the app (checking if the text exists or not)
+    func alertUser(title:String,message:String)
+    {
+        let UIAlert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: "OK", style: .default)
+
+        UIAlert.addAction(action)
+        self.show(UIAlert, sender: nil)
+       
+    }
+
+    func check()
+    {
+        storeBOXGuess = [0,0,0,0,0]
+        if(currentAnswer == correctAnswer)
+        {
+            alertUser(title: "CONGRATULATIONS!!", message: "WOULD YOU LIKE TO PLAY NEXT ROUND")
+            startGame()
+        }else
+        {
+            for i in 0..<correctAnswer.count
+            {
+                let correctChar = (correctAnswer[correctAnswer.index(correctAnswer.startIndex, offsetBy: i)])
+                let belowChar = (currentAnswer[currentAnswer.index(currentAnswer.startIndex, offsetBy: i)])
+                
+                //FIRST COMPARING IT WITH DOWN PART IF IT MATCHES THEN CONTINUE WITH THE NEXT CHARACTER
+                if(correctChar == belowChar)
+                {
+                    storeBOXGuess[i] = 2
+                    continue
+                }
+                
+                for j in 0..<currentAnswer.count
+                {
+                    let currentChar = currentAnswer[currentAnswer.index(currentAnswer.startIndex, offsetBy: j)]
+                    //CHECKING WITH OTHER CHARACTER POSTION IF FOUND MARK IT WITH 1 
+                    if(correctChar == currentChar && storeBOXGuess[j] == 0)
+                    {
+                        storeBOXGuess[j] = 1
+                        break
+                    }
+                }
+            }
+            print(storeBOXGuess)
+        }
+    }
+
 
 }
-
