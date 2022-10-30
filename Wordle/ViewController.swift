@@ -18,6 +18,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var backBtnView: UIView!
     @IBOutlet weak var submitBTN: UIButton!
     @IBOutlet var buttonViewCollection: [UIView]!
+    
+    @IBOutlet weak var showCorrectAnswerTitle: UILabel!
+    @IBOutlet weak var restartBtn: UIButton!
+    
     //default starting postion
     var positionNumber = 0;
     
@@ -26,6 +30,12 @@ class ViewController: UIViewController {
     
     //variable for storing correct answer
     var correctAnswer = "FLOOR"
+    
+    //variable for 5 answers list
+    var worldlists = ["HELLO","WORLD","HOUSE","FLOOR","CHINA"]
+    
+    //to check if prev number matches the current random num
+    var prevNum = -1
     
     var storeBOXGuess = [0,0,0,0,0] // 0 means it's not in the answer, 1 means it's present but not in correct positon and 2 means its present and in correct possition
     
@@ -45,6 +55,29 @@ class ViewController: UIViewController {
     
     func startGame()
     {
+        self.showCorrectAnswerTitle.text = "Wordle"
+        restartBtn.isHidden = true
+        var n = Int.random(in: 0...4)
+        if(prevNum == n )
+        {
+            switch(n){
+            case 0:
+                n = 1
+            case 1:
+                n = 2
+            case 2:
+                n = 3
+            case 3:
+                n = 4
+            case 4:
+                n = 0
+            default:
+                n = 0
+            }
+        }
+        prevNum = n
+        correctAnswer = worldlists[n]
+        
         currentAnswer = ""
         for labelGame in labels{
             labelGame.text = ""
@@ -209,6 +242,12 @@ class ViewController: UIViewController {
             if(showSecondAction)
             {
                 self.positionNumber = 30
+                self.restartBtn.isHidden = false
+                if(title == "You lose, word was \"\(self.correctAnswer)\"")
+                {
+                    self.showCorrectAnswerTitle.text = "Wordle - Answer \(self.correctAnswer)"
+                }
+                
             }
        
         }
@@ -277,6 +316,9 @@ class ViewController: UIViewController {
         let checkwrounword = textcheck.rangeOfMisspelledWord(in: userWord, range: rangeCount, startingAt: 0, wrap: false, language: "en")
         return checkwrounword.location == NSNotFound
     }
-
-
+    
+    @IBAction func restartBtnClick(_ sender: UIButton) {
+        startGame()
+    }
+    
 }
