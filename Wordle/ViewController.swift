@@ -52,6 +52,18 @@ class ViewController: UIViewController {
         backBTN.isEnabled = false
         submitBTN.isEnabled = false
         positionNumber = 0
+        
+        for btnViews in buttonViewCollection{
+            btnViews.backgroundColor = UIColor(red: 128/255, green: 128/255, blue: 128/255, alpha: 1)
+            
+        }
+        for labelView in labelViewCollection{
+            labelView.backgroundColor = .white
+        }
+        
+        for lb in labels{
+            lb.textColor = .black
+        }
     }
 
     //when pressing the back button
@@ -93,8 +105,24 @@ class ViewController: UIViewController {
        
     }
     
+    func orangeColor()->UIColor
+    {
+        return  UIColor(red: 219/255, green: 127/255, blue: 33/255, alpha: 1)
+    }
+    
+    func greyColor()->UIColor
+    {
+        return  UIColor(red: 69/255, green: 73/255, blue: 71/255, alpha: 1)
+    }
+    
+    func blueColor()->UIColor
+    {
+        return  UIColor(red: 60/255, green: 158/255, blue: 182/255, alpha: 1)
+    }
+    
     func colorCodeWords()
     {
+        //this is for box
         var startIndex = positionNumber-5
         var guessCounterIndex = 0
         while startIndex <= positionNumber-1{
@@ -102,14 +130,31 @@ class ViewController: UIViewController {
             labels[startIndex].textColor = .white
             if(storeBOXGuess[guessCounterIndex] == 0)
             {
-                labelViewCollection[startIndex].backgroundColor = UIColor(red: 69/255, green: 73/255, blue: 71/255, alpha: 1)
+                labelViewCollection[startIndex].backgroundColor = greyColor()
             }else if(storeBOXGuess[guessCounterIndex] == 1)
             {
-                labelViewCollection[startIndex].backgroundColor = UIColor(red: 219/255, green: 127/255, blue: 33/255, alpha: 1)
-            }else{
-                labelViewCollection[startIndex].backgroundColor = UIColor(red: 60/255, green: 158/255, blue: 182/255, alpha: 1)
+                labelViewCollection[startIndex].backgroundColor = orangeColor()
+            }else if(storeBOXGuess[guessCounterIndex] == 2){
+                labelViewCollection[startIndex].backgroundColor = blueColor()
             }
             startIndex += 1
+            guessCounterIndex += 1
+        }
+        guessCounterIndex = 0
+        //this is for keyboard
+        for charAscii in currentAnswer.utf8{
+            let storeButton = buttonViewCollection[Int(charAscii)-65]
+            if(storeBOXGuess[guessCounterIndex] == 0 && (storeButton.backgroundColor != blueColor() && storeButton.backgroundColor != orangeColor()))
+            {
+                storeButton.backgroundColor = greyColor()
+            }else if(storeBOXGuess[guessCounterIndex] == 1 && (storeButton.backgroundColor != blueColor()))
+            {
+                storeButton.backgroundColor = orangeColor()
+            }else if(storeBOXGuess[guessCounterIndex] == 2){
+                storeButton.backgroundColor = blueColor()
+            }
+           
+            
             guessCounterIndex += 1
         }
     }
@@ -127,12 +172,11 @@ class ViewController: UIViewController {
             currentAnswer = ""
             if(positionNumber > 28)
             {
-                alertUser(title: "game is over", message: "Press Ok to restart the game")
+                alertUser(title: "You lose, word was \"\(correctAnswer)\"", message: "Press Ok to restart the game", showSecondAction: true)
 
-                startGame()
             }
         }else{
-            alertUser(title: "word is not known", message: "Please check your word!!!")
+            alertUser(title: "word is not known", message: "Please check your word!!!", showSecondAction: false)
         }
         
     }
@@ -154,23 +198,42 @@ class ViewController: UIViewController {
     }
     
     //algorithm for the app (checking if the text exists or not)
-    func alertUser(title:String,message:String)
+    func alertUser(title:String,message:String,showSecondAction:Bool)
     {
         let UIAlert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let action = UIAlertAction(title: "OK", style: .default)
+        let action = UIAlertAction(title: "OK", style: .default) { _ in
+            self.startGame()
+        }
+        let title2 = !showSecondAction ? "Try" : "Nope"
+        let action2 = UIAlertAction(title: title2, style: .destructive) { _ in
+            if(showSecondAction)
+            {
+                self.positionNumber = 30
+            }
+       
+        }
 
-        UIAlert.addAction(action)
+        if(showSecondAction)
+        {
+            UIAlert.addAction(action)
+        }
+       
+            UIAlert.addAction(action2)
+        
+     
+
         self.show(UIAlert, sender: nil)
        
     }
+    
 
     func check()
     {
         storeBOXGuess = [0,0,0,0,0]
         if(currentAnswer == correctAnswer)
         {
-            alertUser(title: "CONGRATULATIONS!!", message: "WOULD YOU LIKE TO PLAY NEXT ROUND")
-            startGame()
+            alertUser(title: "CONGRATULATIONS Word Was Correct!!", message: "WOULD YOU LIKE TO PLAY NEXT ROUND", showSecondAction: true)
+            
         }else
         {
             for i in 0..<correctAnswer.count
@@ -204,6 +267,11 @@ class ViewController: UIViewController {
     
     func checkIFWordExist(userWord:String) -> Bool
     {
+        //some word that got ignored by textChecker
+        if(userWord == "wwwww" || userWord == "xxxxx" || userWord == "vvvvv")
+        {
+            return false
+        }
         let textcheck = UITextChecker()
         let rangeCount = NSRange(location: 0, length: userWord.utf16.count)
         let checkwrounword = textcheck.rangeOfMisspelledWord(in: userWord, range: rangeCount, startingAt: 0, wrap: false, language: "en")
