@@ -25,7 +25,7 @@ class ViewController: UIViewController {
     var currentAnswer = ""
     
     //variable for storing correct answer
-    var correctAnswer = "HGHHI"
+    var correctAnswer = "FLOOR"
     
     var storeBOXGuess = [0,0,0,0,0] // 0 means it's not in the answer, 1 means it's present but not in correct positon and 2 means its present and in correct possition
     
@@ -93,18 +93,46 @@ class ViewController: UIViewController {
        
     }
     
+    func colorCodeWords()
+    {
+        var startIndex = positionNumber-5
+        var guessCounterIndex = 0
+        while startIndex <= positionNumber-1{
+            print(startIndex)
+            labels[startIndex].textColor = .white
+            if(storeBOXGuess[guessCounterIndex] == 0)
+            {
+                labelViewCollection[startIndex].backgroundColor = UIColor(red: 69/255, green: 73/255, blue: 71/255, alpha: 1)
+            }else if(storeBOXGuess[guessCounterIndex] == 1)
+            {
+                labelViewCollection[startIndex].backgroundColor = UIColor(red: 219/255, green: 127/255, blue: 33/255, alpha: 1)
+            }else{
+                labelViewCollection[startIndex].backgroundColor = UIColor(red: 60/255, green: 158/255, blue: 182/255, alpha: 1)
+            }
+            startIndex += 1
+            guessCounterIndex += 1
+        }
+    }
     //when pressing the submit button
     func submit()
     {
-        submitBTN.isEnabled = false
-        backBTN.isEnabled = false
-        print(currentAnswer)
-        check()
-        currentAnswer = ""
-        if(positionNumber > 28)
+        if(checkIFWordExist(userWord: currentAnswer.lowercased()))
         {
             
-            startGame()
+            
+            submitBTN.isEnabled = false
+            backBTN.isEnabled = false
+            print(currentAnswer)
+            check()
+            currentAnswer = ""
+            if(positionNumber > 28)
+            {
+                alertUser(title: "game is over", message: "Press Ok to restart the game")
+
+                startGame()
+            }
+        }else{
+            alertUser(title: "word is not known", message: "Please check your word!!!")
         }
         
     }
@@ -160,7 +188,8 @@ class ViewController: UIViewController {
                 for j in 0..<currentAnswer.count
                 {
                     let currentChar = currentAnswer[currentAnswer.index(currentAnswer.startIndex, offsetBy: j)]
-                    //CHECKING WITH OTHER CHARACTER POSTION IF FOUND MARK IT WITH 1 
+                    
+                    //CHECKING WITH OTHER CHARACTER POSTION IF FOUND MARK IT WITH 1
                     if(correctChar == currentChar && storeBOXGuess[j] == 0)
                     {
                         storeBOXGuess[j] = 1
@@ -169,7 +198,16 @@ class ViewController: UIViewController {
                 }
             }
             print(storeBOXGuess)
+            colorCodeWords()
         }
+    }
+    
+    func checkIFWordExist(userWord:String) -> Bool
+    {
+        let textcheck = UITextChecker()
+        let rangeCount = NSRange(location: 0, length: userWord.utf16.count)
+        let checkwrounword = textcheck.rangeOfMisspelledWord(in: userWord, range: rangeCount, startingAt: 0, wrap: false, language: "en")
+        return checkwrounword.location == NSNotFound
     }
 
 
